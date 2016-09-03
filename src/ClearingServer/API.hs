@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds, LambdaCase, TypeOperators, OverloadedStrings #-}
 
-module Interface
+module ClearingServer.API
 (
     Api
 )
