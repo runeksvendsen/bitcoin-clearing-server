@@ -21,15 +21,3 @@ type Api =
     :<|>    "issue"  :> "deliver"   :> ReqBody '[JSON] PaidInvoice      :> Get  '[JSON] [Note]
     :<|>    "redeem"                :> ReqBody '[JSON] [Note]           :> Post '[JSON] HT.Tx
 
-
-
-
-
-
-
-
-
-
-
-
-
