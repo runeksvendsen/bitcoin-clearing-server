@@ -3,18 +3,13 @@
 module ClearingServer.API
 (
     Api
-)
-where
+) where
 
 import           Types.Data
 import           Types.Response
 import           PromissoryNote.Types
-
 import qualified Network.Haskoin.Transaction as HT
 import           Servant.API
-
-
-
 
 
 
@@ -38,4 +33,3 @@ type Api =
 
 
 
-type ServerInfo = ()
