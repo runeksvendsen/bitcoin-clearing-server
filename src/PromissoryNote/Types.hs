@@ -1,50 +1,34 @@
 module PromissoryNote.Types where
 
-import           Types.Data
+import           ClearingServer.Types
+import           ClearingServer.Types.Data
 
 import qualified Data.Bitcoin.PaymentChannel.Types as PayChan
 import qualified Network.Haskoin.Transaction as HT
 import           Data.Word (Word64)
 
 
--- |Promissory note
-data Note = Note
-  { issue_date          :: UTCTime
-  , exp_date            :: UTCTime
+data PromissoryNote = Note
+  { denomination        :: Currency     -- eg. BTC/USD/LTC/EUR etc.
   , face_value          :: Amount
+  , issue_date          :: UTCTime
+  , exp_date            :: UTCTime
   , issuer_name         :: Identity
-  , issuer_pk           :: PubKey
-  , payee               :: PubKey   }
+  , issuer              :: Hash PubKey
+  , verifiers           :: [Hash PubKey]
+  , negotiation_records :: [NegotiationRec]
+  }
 
+data NegotiationRec = NegRec
+  { bearer              :: Hash PubKey
+  , payment_info        :: Hash PaymentInfo
+  -- | In case of the first negotiation record the previous bearer is the issuer
+  , prev_bearer_sig     :: Signature
+  }
 
-data NoteOrder = NoteOrder
-  { order_date      :: UTCTime
-  , note_value      :: Amount
-  , quantity        :: Word
-  , payee_pk        :: PubKey
-  , paymement_terms :: PaymentTerms }
-
-
-data NoteInvoice = NoteInvoice
-  { order           :: NoteOrder
-  , amount_fees     :: Amount
-  , amount_total    :: Amount
-  , issuer_sig      :: Signature    }
-
-
-data PaidInvoice = PaidInvoice
-  { invoice         ::  NoteInvoice
-  , payment         ::  Payment }
-
-
--- |
-data PaymentTerms =
-    PayByPaymentChan    PubKey
-
-data Payment =
-    PayChanPayment      PayChan.Payment
-
-
+data PaymentInfo = PayInf
+  { payment_data        :: ByteString
+  }
 
 
 
