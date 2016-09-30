@@ -1,23 +1,35 @@
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings, TypeSynonymInstances, FlexibleInstances, DataKinds #-}
 
 module ClearingServer.Config.Types where
 
-import           ClearingServer.Types
-import           ClearingServer.Config.Util
-import           Data.Configurator.Types
+import           ClearingServer.Config.Parse
+import qualified Data.Configurator.Types as Configurator
+import qualified Data.Tagged as Tag
 import qualified Servant.Common.BaseUrl as BaseUrl
 
+
+
 class FromConfig a where
-    fromConf :: Config -> IO a
+    fromConfigurator :: Configurator.Config -> IO a
+
+type ChanManagerConn = Tag.Tagged "ChanManager" BaseUrl.BaseUrl
+type PayChanConn     = Tag.Tagged "PayChanServer" BaseUrl.BaseUrl
 
 
-data PayChanServer = PayChanServer
-  {  host       :: ByteString
-  ,  mgmtPort   :: Word
+instance FromConfig ChanManagerConn where
+    fromConfigurator = fmap Tag.Tagged .
+        parseBaseUrl "payChanServer.management"
+
+instance FromConfig PayChanConn where
+    fromConfigurator = fmap Tag.Tagged .
+        parseBaseUrl "payChanServer.payment"
+
+
+data AppConf = AppConf
+  { manageEndpoint      :: ChanManagerConn
+  , paymentEndpoint     :: PayChanConn
   }
 
-instance FromConfig PayChanServer where
-    fromConf cfg = PayChanServer <$>
-        configLookupOrFail cfg "payChanServer.management.host" <*>
-        configLookupOrFail cfg "payChanServer.management.port"
-
+instance FromConfig AppConf where
+    fromConfigurator cfg = AppConf <$>
+        fromConfigurator cfg <*> fromConfigurator cfg

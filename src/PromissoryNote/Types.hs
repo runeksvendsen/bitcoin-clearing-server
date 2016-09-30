@@ -1,40 +1,30 @@
+{-# LANGUAGE DeriveGeneric #-}
 module PromissoryNote.Types where
 
-import           ClearingServer.Types
+import           Types
 import           ClearingServer.Types.Data
-
-import qualified Data.Bitcoin.PaymentChannel.Types as PayChan
-import qualified Network.Haskoin.Transaction as HT
-import           Data.Word (Word64)
-
+import           GHC.Generics
 
 data PromissoryNote = Note
-  { denomination        :: Currency     -- eg. BTC/USD/LTC/EUR etc.
-  , face_value          :: Amount
-  , issue_date          :: UTCTime
-  , exp_date            :: UTCTime
-  , issuer_name         :: Identity
-  , issuer              :: Hash PubKey
-  , verifiers           :: [Hash PubKey]
+  { denomination        ::  Currency     -- eg. BTC/USD/LTC/EUR etc.
+  , face_value          ::  Amount
+  , issue_date          ::  UTCTime
+  , exp_date            ::  UTCTime
+  , issuer_name         ::  Identity
+  , issuer              ::  UUID
+  , verifiers           :: [UUID]
   , negotiation_records :: [NegotiationRec]
-  }
+  } deriving Generic
 
 data NegotiationRec = NegRec
-  { bearer              :: Hash PubKey
-  , payment_info        :: Hash PaymentInfo
+  { bearer              :: UUID
+  , payment_info        :: UUID
   -- | In case of the first negotiation record the previous bearer is the issuer
   , prev_bearer_sig     :: Signature
-  }
+  } deriving Generic
 
 data PaymentInfo = PayInf
   { payment_data        :: ByteString
-  }
-
-
-
-
-
-
-
+  } deriving Generic
 
 

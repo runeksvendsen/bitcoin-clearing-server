@@ -1,2 +1,0 @@
-module IssueStore.Types where
-
