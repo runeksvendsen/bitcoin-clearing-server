@@ -1,0 +1,32 @@
+
+resolver: lts-7.1
+
+packages:
+- '.'
+- location:
+    git: https://github.com/runeksvendsen/bitcoin-payment-channel.git
+    commit: ccdccee54c24fd875de232f4e3965b600913069b
+  extra-dep: true
+- location:
+    git: https://github.com/runeksvendsen/haskell-rbpcp-api.git
+    commit: ca0e77b0aba7890cc478a6f99d2f11dab352cdb0
+  extra-dep: true
+- location:
+    git: https://github.com/runeksvendsen/haskell-stm-diskmap.git
+    commit: 4791a3ab9f3129541333da9daaf26f5587e20a73
+  extra-dep: true
+
+extra-deps:
+# Haskoin
+- haskoin-core-0.4.0
+- murmur3-1.0.3
+- pbkdf-1.1.1.1
+- secp256k1-0.4.6
+- eccrypto-0.0.1
+- ecdsa-0.2
+
+# Override default flag values for local packages and extra-deps
+flags: {}
+
+# Extra package databases containing global packages
+extra-package-dbs: []
