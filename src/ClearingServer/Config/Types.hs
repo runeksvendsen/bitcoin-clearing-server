@@ -1,29 +1,29 @@
 {-# LANGUAGE OverloadedStrings, TypeSynonymInstances, FlexibleInstances, DataKinds #-}
 
-module ClearingServer.Config.Types where
+module ClearingServer.Config.Types
+(
+    module ClearingServer.Config.Types
+  , module Types.Config
+)
+where
 
-import           ClearingServer.Config.Parse
-import qualified Data.Configurator.Types as Configurator
+import           Types
+import           Types.Config
+import           Util.Config.Parse
 import qualified Data.Tagged as Tag
 import qualified Servant.Common.BaseUrl as BaseUrl
 
 
-
-class FromConfig a where
-    fromConfigurator :: Configurator.Config -> IO a
-
-type ChanManagerConn = Tag.Tagged "ChanManager" BaseUrl.BaseUrl
-type PayChanConn     = Tag.Tagged "PayChanServer" BaseUrl.BaseUrl
-
-
 instance FromConfig ChanManagerConn where
-    fromConfigurator = fmap Tag.Tagged .
-        parseBaseUrl "payChanServer.management"
+    fromConf = parseTaggedBaseUrl "payChanServer.management"
 
 instance FromConfig PayChanConn where
-    fromConfigurator = fmap Tag.Tagged .
-        parseBaseUrl "payChanServer.payment"
+    fromConf = parseTaggedBaseUrl "payChanServer.payment"
 
+data ChanManager
+data PayChanServer
+type ChanManagerConn = Tag.Tagged ChanManager BaseUrl.BaseUrl
+type PayChanConn     = Tag.Tagged PayChanServer BaseUrl.BaseUrl
 
 data AppConf = AppConf
   { manageEndpoint      :: ChanManagerConn
@@ -31,5 +31,6 @@ data AppConf = AppConf
   }
 
 instance FromConfig AppConf where
-    fromConfigurator cfg = AppConf <$>
-        fromConfigurator cfg <*> fromConfigurator cfg
+    fromConf cfg = AppConf <$>
+        fromConf cfg <*>
+        fromConf cfg

@@ -2,21 +2,25 @@
 
 module Util
 (
-    cs
+    module Util.Hex
+  , cs
   , (<>)
   , readerToEither
-  , wrapArg
   , envReadPort
+  , fmapL
+  , errorWithDescription
 )
 where
 
+import           Util.Hex
 import           Types
-import           Util.Config (wrapArg)
 import           Data.String.Conversions (cs)
 import           Data.Monoid ((<>))
 import           Servant
+import           Data.EitherR (fmapL)
 
 import qualified Control.Monad.Reader as Reader
+import qualified Control.Monad.Error.Class as Except
 
 import           System.Environment (lookupEnv)
 import           Text.Read (readMaybe)
@@ -27,3 +31,7 @@ readerToEither cfg = Nat $ \x -> Reader.runReaderT x cfg
 
 envReadPort :: IO (Maybe Word)
 envReadPort = maybe Nothing readMaybe <$> lookupEnv "PORT"
+
+errorWithDescription :: Int -> String -> AppM conf a
+errorWithDescription code e = Except.throwError $
+    err400 { errReasonPhrase = cs e, errBody = cs e, errHTTPCode = code}

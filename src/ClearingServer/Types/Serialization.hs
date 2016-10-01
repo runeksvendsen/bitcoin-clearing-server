@@ -3,6 +3,6 @@ module ClearingServer.Types.Serialization where
 import ClearingServer.Types
 import Data.Serialize
 
-instance HasID NoteInvoice where
+instance HasUUID NoteInvoice where
     serializeForID = encode
 

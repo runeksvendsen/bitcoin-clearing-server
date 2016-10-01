@@ -1,9 +1,10 @@
 module Types
 (
     module Types.Crypto
+  , module Types.Config
   , BS.ByteString
   , T.Text
-  , HasID(..)
+  , HasUUID(..)
   , UUID
   , AppM
 --   , UUID(..)
@@ -13,6 +14,7 @@ where
 
 import           Types.UUID
 import           Types.Crypto
+import           Types.Config
 
 import qualified Data.Text as T
 import qualified Data.ByteString as BS
