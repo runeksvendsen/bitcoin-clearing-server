@@ -4,14 +4,14 @@ module Store.Server where
 import           Types
 import           PromissoryNote
 import           Util
-import           Store.API
+import qualified Store.API as API
 import           Store.Types
 import qualified Data.DiskMap as Disk
 import           Servant
 import qualified Control.Monad.Reader as R
 
 
-storeApp :: ServerT API AppStore
+storeApp :: ServerT API.Store AppStore
 storeApp = getItem :<|> putItem :<|> delItem
     where
         getItem k   = R.ask >>= \m -> fetchItem m k

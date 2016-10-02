@@ -34,6 +34,7 @@ executable bitcoin-clearing-server
                     ,   haskell-rbpcp-api
                     ,   haskoin-core
                     ,   mtl
+                    ,   transformers
                     ,   eccrypto
                     ,   MonadRandom
                     ,   SHA
@@ -45,6 +46,8 @@ executable bitcoin-clearing-server
                     ,   servant-client
                     ,   http-api-data
                     ,   http-media
+                    ,   http-client
+                    ,   http-client-tls
                     ,   wai
                     ,   warp
                     ,   configurator
@@ -98,6 +101,7 @@ executable note-store
                     ,   haskell-rbpcp-api
                     ,   haskoin-core
                     ,   mtl
+                    ,   transformers
                     ,   eccrypto
                     ,   MonadRandom
                     ,   SHA
@@ -109,6 +113,8 @@ executable note-store
                     ,   servant-client
                     ,   http-api-data
                     ,   http-media
+                    ,   http-client
+                    ,   http-client-tls
                     ,   wai
                     ,   warp
                     ,   configurator

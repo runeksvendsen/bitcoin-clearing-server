@@ -1,3 +1,10 @@
 module ClearingServer.Handlers.Order where
 
-issueOrderHandler = error "STUB"
+import Types
+import ClearingServer.Types
+import qualified ClearingServer.Config.Types as Conf
+
+
+noteOrderHandler :: NoteOrder -> AppM Conf.AppConf NoteInvoice
+noteOrderHandler order =
+    error "STUB"

@@ -2,7 +2,7 @@
 module Store.Lib where
 
 import           Types
-import           Store.API
+import qualified Store.API as API
 import           Store.Server
 import           Store.Types ()
 import           PromissoryNote
@@ -12,7 +12,7 @@ import           Servant
 import qualified Network.Wai as Wai
 
 
-apiStore :: Proxy API
+apiStore :: Proxy API.Store
 apiStore = Proxy
 
 storeServerApp :: DiskMap UUID PromissoryNote -> Wai.Application

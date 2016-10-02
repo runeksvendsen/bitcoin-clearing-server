@@ -6,5 +6,5 @@ import RBPCP.Callback
 
 
 valueReceivedHandler :: PaymentInfo -> AppM Conf.AppConf PaymentResponse
-valueReceivedHandler (PaymentInfo paymentValue chanValLeft) =
-    error "STUB"
+valueReceivedHandler (PaymentInfo amount senderPK chanValueLeft chanTotalValue) =
+    return $ PaymentResponse "hello world"

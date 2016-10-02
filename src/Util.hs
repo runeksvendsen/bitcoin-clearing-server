@@ -9,6 +9,7 @@ module Util
   , envReadPort
   , fmapL
   , errorWithDescription
+  , runLocalhost
 )
 where
 
@@ -21,6 +22,9 @@ import           Data.EitherR (fmapL)
 
 import qualified Control.Monad.Reader as Reader
 import qualified Control.Monad.Error.Class as Except
+
+import qualified Network.Wai as Wai
+import qualified Network.Wai.Handler.Warp as Warp
 
 import           System.Environment (lookupEnv)
 import           Text.Read (readMaybe)
@@ -35,3 +39,8 @@ envReadPort = maybe Nothing readMaybe <$> lookupEnv "PORT"
 errorWithDescription :: Int -> String -> AppM conf a
 errorWithDescription code e = Except.throwError $
     err400 { errReasonPhrase = cs e, errBody = cs e, errHTTPCode = code}
+
+runLocalhost :: Word -> Wai.Application -> IO ()
+runLocalhost port = Warp.runSettings settings
+    where settings = Warp.setPort (fromIntegral port) $
+                        Warp.setHost "127.0.0.1" Warp.defaultSettings

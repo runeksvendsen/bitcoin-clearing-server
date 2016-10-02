@@ -9,7 +9,7 @@ packages:
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/haskell-rbpcp-api.git
-    commit: ca0e77b0aba7890cc478a6f99d2f11dab352cdb0
+    commit: f891a0598f1c9f6d3d2b3b1460dc32b8f4f690a6
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/haskell-stm-diskmap.git

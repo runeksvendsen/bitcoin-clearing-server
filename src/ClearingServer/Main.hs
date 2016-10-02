@@ -1,33 +1,17 @@
 {-# LANGUAGE OverloadedStrings, DataKinds, FlexibleContexts, LambdaCase, TypeOperators #-}
 module ClearingServer.Main where
 
-import           Types
 import           Util
 import           Util.Config (wrapArg)
-import qualified ClearingServer.API as API
 import qualified ClearingServer.Config.Types as Conf
-import           ClearingServer.Handlers.Order   (issueOrderHandler)
-import           ClearingServer.Handlers.Redeem  (noteRedemptionHandler)
 
-import           Servant
-import qualified Network.Wai as Wai
+import qualified ClearingServer.Server.Issue as Issue
+import qualified ClearingServer.Server.Callback as Callback
+
 import qualified Network.Wai.Handler.Warp as Warp
 import qualified Data.Configurator.Types as Configurator
+import           Control.Concurrent (forkIO)
 import           Data.Maybe (fromMaybe)
-
-
-clearingApp :: ServerT API.NoteAPI (AppM Conf.AppConf)
-clearingApp = issueOrder :<|> redeemNotes
-    where
-        issueOrder     = issueOrderHandler
-        redeemNotes    = noteRedemptionHandler
-
-apiClearing :: Proxy API.NoteAPI
-apiClearing = Proxy
-
-clearingServerApp :: Conf.AppConf -> Wai.Application
-clearingServerApp cfg = serve apiClearing $ serverEmbedConf clearingApp cfg
-    where serverEmbedConf server cfg = enter (readerToEither cfg) server
 
 
 main :: IO ()
@@ -40,5 +24,7 @@ runApp cfg = do
     --  Get port from PORT environment variable, if it contains a valid port number
     maybePort <- envReadPort
     appConf <- Conf.fromConf cfg
-    --  Start app
-    Warp.run (fromIntegral . fromMaybe 8080 $ maybePort) (clearingServerApp appConf)
+    --  Start callback handler app
+    forkIO $ runLocalhost (Conf.getCallbackPort appConf) (Callback.serverApp appConf)
+    --  Start issue/redeem app
+    Warp.run (fromIntegral . fromMaybe 8081 $ maybePort) (Issue.serverApp appConf)

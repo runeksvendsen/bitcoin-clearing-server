@@ -1,3 +1,10 @@
 module ClearingServer.Handlers.Redeem where
 
-noteRedemptionHandler = error "STUB"
+import Types
+import PromissoryNote
+import qualified ClearingServer.Config.Types as Conf
+
+
+noteRedemptionHandler :: [PromissoryNote] -> AppM Conf.AppConf BitcoinTx
+noteRedemptionHandler pnList =
+    error "STUB"
