@@ -7,7 +7,7 @@ import qualified Data.ByteString.Base16 as B16
 import qualified Network.Haskoin.Transaction as HT
 import qualified Network.Haskoin.Script as HS
 import qualified Network.Haskoin.Crypto as HC
-import qualified Data.Bitcoin.PaymentChannel.Types as BTC
+import qualified Data.Bitcoin.PaymentChannel.Types as Pay
 
 class Bin.Serialize a => HexBinEncode a where
     hexEncode :: a -> BS.ByteString
@@ -18,15 +18,15 @@ class Bin.Serialize a => HexBinDecode a where
     hexDecode = Bin.decode . fst . B16.decode
 
 instance HexBinEncode BS.ByteString where hexEncode = B16.encode
-instance HexBinEncode BTC.RecvPubKey
-instance HexBinEncode BTC.SendPubKey
+instance HexBinEncode Pay.RecvPubKey
+instance HexBinEncode Pay.SendPubKey
 instance HexBinEncode HS.Script
 instance HexBinEncode HC.Signature
 instance HexBinEncode HT.TxHash
 
 instance HexBinDecode BS.ByteString where hexDecode = Right . fst . B16.decode
-instance HexBinDecode BTC.RecvPubKey
-instance HexBinDecode BTC.SendPubKey
+instance HexBinDecode Pay.RecvPubKey
+instance HexBinDecode Pay.SendPubKey
 instance HexBinDecode HS.Script
 instance HexBinDecode HC.Signature
 instance HexBinDecode HT.TxHash

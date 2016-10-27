@@ -1,8 +1,10 @@
 module PromissoryNote
 (
-    module PromissoryNote.Types
+    module PromissoryNote.Note
+,   module PromissoryNote.Redeem
 )
  where
 
-import PromissoryNote.Types
+import PromissoryNote.Note
+import PromissoryNote.Redeem
 import PromissoryNote.Serialization ()

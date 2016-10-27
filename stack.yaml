@@ -1,29 +1,50 @@
 
-resolver: lts-7.1
+resolver: lts-6.15
+#resolver: lts-7.1
 
 packages:
 - '.'
 - location:
+    git: https://github.com/runeksvendsen/haskoin.git
+    commit: 170c343c8fca5cca776d2199cd1a81e12f9c4225
+  extra-dep: true
+  subdirs:
+    - haskoin-core
+    - haskoin-node
+    - haskoin-wallet
+- location:
     git: https://github.com/runeksvendsen/bitcoin-payment-channel.git
-    commit: ccdccee54c24fd875de232f4e3965b600913069b
+    commit: d421671d36a7782203cf297a1c351436e036c9a1
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/haskell-rbpcp-api.git
     commit: f891a0598f1c9f6d3d2b3b1460dc32b8f4f690a6
   extra-dep: true
 - location:
-    git: https://github.com/runeksvendsen/haskell-stm-diskmap.git
-    commit: 4791a3ab9f3129541333da9daaf26f5587e20a73
+    git: https://github.com/runeksvendsen/key-value-store.git
+    commit: 82ca4d2d1d4b242f264c04462ab61b632ad6d55c
   extra-dep: true
+- location:
+    git: https://github.com/runeksvendsen/chanstore-api.git
+    commit: 7d97e998f78673d86c2e595fb9970f0b9c8dc86d
+  extra-dep: true
+
 
 extra-deps:
 # Haskoin
-- haskoin-core-0.4.0
+  #- haskoin-core-0.4.0
 - murmur3-1.0.3
 - pbkdf-1.1.1.1
 - secp256k1-0.4.6
 - eccrypto-0.0.1
 - ecdsa-0.2
+# haskoin-wallet
+- daemons-0.2.1
+- esqueleto-2.4.3
+- haskoin-node-0.4.0
+- cryptohash-sha256-0.11.100.1
+- rate-limit-1.1.1
+#- time-units-1.0.0
 
 # Override default flag values for local packages and extra-deps
 flags: {}

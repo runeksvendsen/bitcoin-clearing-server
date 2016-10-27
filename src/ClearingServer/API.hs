@@ -6,7 +6,7 @@ module ClearingServer.API
   , Callback
 ) where
 
-import           ClearingServer.Types
+import           ClearingServer.Lib.Types
 import           PromissoryNote
 import qualified Network.Haskoin.Transaction as HT
 import           Servant.API
