@@ -1,0 +1,1 @@
+../src/BitcoinSigner/Main.hs

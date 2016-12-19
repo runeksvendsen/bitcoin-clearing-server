@@ -1,0 +1,1 @@
+../src/Util/Bitcoin/Wallet/Cmd.hs

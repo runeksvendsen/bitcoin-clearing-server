@@ -1,0 +1,1 @@
+../src/BitcoinSigner/Lib/Arming/Types.hs

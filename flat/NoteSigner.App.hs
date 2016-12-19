@@ -1,0 +1,1 @@
+../src/NoteSigner/App.hs
