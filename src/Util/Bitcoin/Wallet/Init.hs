@@ -10,18 +10,18 @@ import qualified    System.ZMQ4                 as ZMQ
 
 type AccountName = Text
 
-init :: Config -> ZMQ.Context -> HC.XPubKey -> IO AccountName
-init cfg ctx pubkey = do
-    accountList <- cmdListAccounts cfg ctx
+initAccount :: Config -> ZMQ.Context -> HC.XPubKey -> IO AccountName
+initAccount cfg ctx pubkey = runCmd (cfg,ctx) $ do
+    accountList <- cmdListAccounts
     if null accountList then
              createInitialWalletAccount
         else checkAccount accountList
     where
         createInitialWalletAccount =
-            cmdNewAccount cfg ctx (mkNewAccount pubkey) >>
-            putStrLn "WALLET_INIT: INFO: Initialized wallet account." >>
+            cmdNewAccount (mkNewAccount pubkey) >>
+            liftIO (putStrLn "WALLET_INIT: INFO: Initialized wallet account.") >>
             return (newAccountName $ mkNewAccount pubkey)
-        checkAccount :: [JsonAccount] -> IO AccountName
+        checkAccount :: [JsonAccount] -> WalletM AccountName
         checkAccount acl = do
             when (length acl /= 1) $
                 error "WALLET_INIT: ERROR: There should be only one account in the wallet."

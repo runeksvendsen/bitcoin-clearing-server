@@ -19,7 +19,7 @@ main = wrapArg runApp
 runApp :: Configurator.Config -> String -> IO ()
 runApp cfg _ = do
     --  Get port from PORT environment variable, if it contains a valid port number
-    maybePort <- envReadPort
+    maybePort <- envRead "PORT"
     appConf <- Conf.fromConf cfg
     --  Start callback handler app
     forkIO $ runLocalhost (Conf.getCallbackPort appConf) (Callback.serverApp appConf)

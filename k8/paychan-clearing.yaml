@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: paychan-note-clearing
+  labels:
+    name: ""
+  namespace: ""
+  annotations: []
+  generateName: ""
+
+spec:
+  restartPolicy: ""
+
+  volumes:
+  - name: cache-volume
+    emptyDir:
+      medium: "Memory"
+
+  containers:
+    #####
+    ## PayChanServer
+    -
+      name: "paychan"
+      image: "paychan-test/paychan:v1/PayChanServer"
+      args:
+        - "/config/debug"
+      command:
+        - "PayChanServer"
+      env:
+        -
+          name: "CALLBACK_PORT"
+          value: "9000"
+        -
+          name: "CALLBACK_HOST"
+          value: "localhost"
+        -
+          name: "CALLBACK_PROTO"
+          value: "http"
+      imagePullPolicy: ""
+      ports:
+        -
+          containerPort: 80
+          name: ""
+          protocol: ""
+      resources:
+        cpu: ""
+        memory: "100M"
+
+    #####
+    ## ClearingServer
+    -
+      name: "clearing"
+      image: "runeks/clearing"
+      args:
+        - "/config/debug"
+      command:
+        - "ClearingServer"
+      env:
+        -
+          name: "CALLBACK_PORT"
+          value: "9000"
+        -
+          name: "CALLBACK_HOST"
+          value: "localhost"
+        -
+          name: "CALLBACK_PROTO"
+          value: "http"
+        -
+          name: "NOTE_SIGNER_PORT"
+          value: "9001"
+        -
+          name: "NOTE_SIGNER_HOST"
+          value: "localhost"
+        -
+          name: "NOTE_SIGNER_PROTO"
+          value: "http"
+      ports:
+        -
+          containerPort: 9000
+          name: ""
+          protocol: ""
+      resources:
+        cpu: ""
+        memory: "100M"
+
+    #####
+    ## NoteSigner
+    -
+      image: "runeks/clearing"
+      name: "note-signer"
+      command:
+        - "NoteSigner"
+      ports:
+        -
+          containerPort: 9001
+          name: ""
+          protocol: ""
+      volumeMounts:
+        - mountPath: /tmpfs
+          name: cache-volume
+      env:
+        -
+          name: "NOTE_SIGNER_PORT"
+          value: "9001"
+        -
+          name: "NOTE_SIGNER_HOST"
+          value: "localhost"
+        -
+          name: "NOTE_SIGNER_PROTO"
+          value: "http"
+        ### How to inject key:
+        #   $ kubectl create secret generic note-signer-key
+        #       --from-literal=note-privatekey=f28feb28323...
+        #
+        - name: NOTE_SIGNER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: note-signer-key
+              key: note-privatekey
+      resources:
+        cpu: ""
+        memory: "100M"

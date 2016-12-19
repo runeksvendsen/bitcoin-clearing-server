@@ -1,12 +1,42 @@
 
 resolver: lts-6.15
 #resolver: lts-7.1
+#resolver: nightly-2016-11-17
+
+
+# Generate a Docker image
+image:
+  containers:
+    - name: runeks/clearing
+      base: fpco/haskell-scratch
+      add:
+        config: /config
+        static: /test
+
+docker:
+  # container-name: "example-name"
+  enable: false
+  # repo: "fpco/stack-build"
+  image: "d8f36708ed21"
+  #  registry-login: false
+  #  registry-username: "myuser"
+  #  registry-password: "SETME"
+  #  auto-pull: false
+  #  detach: false
+  #  persist: false
+  #  mount:
+  #    - "/foo/bar"
+  #    - "/baz:/tmp/quux"
+  #  env:
+  #    - "FOO=BAR"
+  #    - "BAR=BAZ QUUX"
+
 
 packages:
 - '.'
 - location:
     git: https://github.com/runeksvendsen/haskoin.git
-    commit: 170c343c8fca5cca776d2199cd1a81e12f9c4225
+    commit: ddb3adbf59aa5a21c349e5db27ee977282036868
   extra-dep: true
   subdirs:
     - haskoin-core
@@ -14,36 +44,74 @@ packages:
     - haskoin-wallet
 - location:
     git: https://github.com/runeksvendsen/bitcoin-payment-channel.git
-    commit: d421671d36a7782203cf297a1c351436e036c9a1
+    commit: e4c87b97fb8401ae4a8805472ff47f3e3675340a
   extra-dep: true
 - location:
     git: https://github.com/runeksvendsen/haskell-rbpcp-api.git
-    commit: f891a0598f1c9f6d3d2b3b1460dc32b8f4f690a6
+    commit: 6eaf4494d4c0fea0a2a8087766938463416d6db9
   extra-dep: true
 - location:
-    git: https://github.com/runeksvendsen/key-value-store.git
-    commit: 82ca4d2d1d4b242f264c04462ab61b632ad6d55c
+    git: https://github.com/runeksvendsen/promissory-note-types.git
+    commit: 0ff7e180bf94a9d881b896ed70eb04bb672ef54a
   extra-dep: true
 - location:
-    git: https://github.com/runeksvendsen/chanstore-api.git
-    commit: 7d97e998f78673d86c2e595fb9970f0b9c8dc86d
+    git: https://github.com/tsuraan/bytestring-arbitrary.git
+    commit: ce6234d7204d8f1faa3a7c05f4802ead210245ce
   extra-dep: true
+
+#- location:
+#    git: https://github.com/runeksvendsen/paychan-datastore.git
+#    commit: cf6c7e94c906cd2cae5cec4597180a748eaff036
+#  extra-dep: true
+#- location:
+#    git: https://github.com/brendanhay/gogol.git
+#    commit: c744fee403bbe7bbdadcf3fa67037ba11004f359
+#  extra-dep: true
+#  subdirs:
+#    - gogol
+#    - core
+#    - gogol-datastore
 
 
 extra-deps:
-# Haskoin
-  #- haskoin-core-0.4.0
+- cryptohash-sha256-0.11.100.1
+- eccrypto-0.0.1
+- haskoin-core-0.4.0
+- haskoin-node-0.4.0
+- haskoin-wallet-0.4.0
+- rate-limit-1.1.1
+- secp256k1-0.4.6
+- daemons-0.2.1
 - murmur3-1.0.3
 - pbkdf-1.1.1.1
-- secp256k1-0.4.6
-- eccrypto-0.0.1
-- ecdsa-0.2
-# haskoin-wallet
-- daemons-0.2.1
-- esqueleto-2.4.3
-- haskoin-node-0.4.0
-- cryptohash-sha256-0.11.100.1
-- rate-limit-1.1.1
+
+
+#- haskoin-core-0.4.0
+#- murmur3-1.0.3
+#- pbkdf-1.1.1.1
+#- secp256k1-0.4.6
+#- eccrypto-0.0.1
+#- haskoin-node-0.4.0
+#- haskoin-wallet-0.4.0
+#- rate-limit-1.1.1
+#- time-units-1.0.0
+#- daemons-0.2.1
+#- esqueleto-2.4.3
+
+
+# Haskoin
+  #- haskoin-core-0.4.0
+#- murmur3-1.0.3
+#- pbkdf-1.1.1.1
+#- secp256k1-0.4.6
+#- eccrypto-0.0.1
+#- ecdsa-0.2
+## haskoin-wallet
+#- daemons-0.2.1
+#- esqueleto-2.4.3
+#- haskoin-node-0.4.0
+#- cryptohash-sha256-0.11.100.1
+#- rate-limit-1.1.1
 #- time-units-1.0.0
 
 # Override default flag values for local packages and extra-deps

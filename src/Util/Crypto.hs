@@ -12,6 +12,13 @@ getRootXPubKey = HC.deriveXPubKey
 defaultPath :: HC.SoftPath
 defaultPath = Deriv :/ Wallet.addrTypeIndex Wallet.AddressExternal
 
+xPubFromIndexM :: Word.Word32 -> KeyBox HC.XPubKey
+xPubFromIndexM i = Reader.ask >>=
+    \rootPrv -> return $ subKeyPub (getRootXPubKey rootPrv) i
+
+prvKeyCFromIndexM :: Word.Word32 -> KeyBox HC.PrvKeyC
+prvKeyCFromIndexM i = xPubFromIndexM i >>= prvKeyFromPubM
+
 prvKeyFromPubM :: HC.XPubKey -> KeyBox HC.PrvKeyC
 prvKeyFromPubM xPub = flip prvKeyFromXPub xPub <$> Reader.ask
 
@@ -41,10 +48,6 @@ runSignM :: HC.XPrvKey -> KeyBox a -> a
 runSignM = flip Reader.runReader
 
 type KeyBox = Reader.Reader HC.XPrvKey
-
-
-
-
 
 
 

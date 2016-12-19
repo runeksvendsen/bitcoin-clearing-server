@@ -18,96 +18,147 @@ source-repository head
   type:     git
   location: https://github.com/runeksvendsen/bitcoin-clearing-server
 
---executable bitcoin-clearing-server
---  main-is:              ClearingServer/Main.hs
---
---  ghc-options:          -W -main-is ClearingServer.Main
---
---  default-extensions:   OverloadedStrings RecordWildCards FlexibleContexts
---
---  build-depends:        base >= 4.7 && < 5
---                    ,   bytestring
---                    ,   base16-bytestring
---                    ,   binary
---                    ,   aeson
---                    ,   bitcoin-payment-channel
---                    ,   haskell-rbpcp-api
---                    ,   haskoin-core
---                    ,   mtl
---                    ,   transformers
---                    ,   eccrypto
---                    ,   MonadRandom
---                    ,   SHA
---                    ,   crypto-api
---                    ,   secp256k1
---                    ,   largeword
---                    ,   servant
---                    ,   servant-server
---                    ,   servant-client
---                    ,   http-api-data
---                    ,   http-media
---                    ,   http-client
---                    ,   http-client-tls
---                    ,   wai
---                    ,   warp
---                    ,   configurator
---                    ,   string-conversions
---                    ,   tagged
---                    ,   text
+executable bitcoin-clearing-server
+  main-is:              ClearingServer/Main.hs
+
+  ghc-options:          -W -main-is ClearingServer.Main
+
+  default-extensions:   OverloadedStrings RecordWildCards FlexibleContexts
+
+  build-depends:        base >= 4.7 && < 5
+                    ,   bytestring
+                    ,   base16-bytestring
+                    ,   binary
+                    ,   aeson
+                    ,   bitcoin-payment-channel
+                    ,   promissory-note-types
+                    ,   haskell-rbpcp-api
+                    ,   haskoin-core
+                    ,   haskoin-wallet
+                    ,   haskoin-node
+                    ,   zeromq4-haskell
+                    ,   mtl
+                    ,   transformers
+                    ,   eccrypto
+                    ,   MonadRandom
+                    ,   SHA
+                    ,   crypto-api
+                    ,   secp256k1
+                    ,   largeword
+                    ,   servant
+                    ,   servant-server
+                    ,   servant-client
+                    ,   http-api-data
+                    ,   http-media
+                    ,   http-client
+                    ,   http-client-tls
+                    ,   wai
+                    ,   warp
+                    ,   configurator
+                    ,   string-conversions
+                    ,   tagged
+                    ,   text
 --                    ,   key-value-store
---                    ,   hashable
---                    ,   cryptohash-sha256
---                    ,   cereal
---                    ,   errors
---                    ,   lifted-base, monad-control, transformers
---
---  hs-source-dirs:       src
---  default-language:     Haskell2010
---  other-modules:
+                    ,   hashable
+                    ,   cryptohash-sha256
+                    ,   cereal
+                    ,   errors
+                    ,   lifted-base, monad-control, transformers
+                    ,   stm
+                    ,   stm-containers
+                    ,   monad-logger
+                   ,   unordered-containers
+                   ,   persistent-sqlite
+                   ,   resourcet
+
+  hs-source-dirs:       src
+  default-language:     Haskell2010
+  other-modules:            ClearingServer.API
+                            ClearingServer.Config.Types
+                            ClearingServer.Handlers.Callback.ValueRecv
+                            ClearingServer.Handlers.Redeem
+                            ClearingServer.Lib.App.Callback
+                            ClearingServer.Lib.App.Issue
+                            ClearingServer.Lib.Types
+                            ClearingServer.Lib.Types.Data
+                            ClearingServer.Lib.Types.Error
+                            NoteSigner.Types.Error
+                            NoteSigner.Types.Request
+                            Types
+                            Types.Config
+                            Types.Orphans
+                            Types.UUID
+                            Util
+                            Util.Common
+                            Util.Config
+                            Util.Config.Parse
+                            Util.Crypto
+                            Util.Hex
+                            Util.Log
+                            Util.Retry
+                            Util.Bitcoin.ChainCache
+                            Util.Bitcoin.Wallet
 
 
---executable note-signer
---  main-is:              NoteSigner/Main.hs
---
---  ghc-options:          -W -main-is NoteSigner.Main
---
---  default-extensions:   OverloadedStrings
---
---  build-depends:        base >= 4.7 && < 5
---                    ,   bitcoin-payment-channel
---                    ,   stm-containers
---                    ,   chanstore-api
---                    ,   servant
---                    ,   servant-server
---                    ,   servant-client
---
---  hs-source-dirs:       src
---
---  default-language:     Haskell2010
---
---  other-modules:        ClearingServer.API
---                        ClearingServer.Config.Types
---                        ClearingServer.Handlers.Order
---                        ClearingServer.Handlers.Redeem
---                        ClearingServer.Types
---                        ClearingServer.Types.Data
---                        PromissoryNote
---                        PromissoryNote.Serialization
---                        PromissoryNote.Types
---                        Types
---                        Types.Config
---                        Types.Crypto
---                        Types.Orphans
---                        Types.UUID
---                        Util
---                        Util.Config
---                        Util.Config.Parse
---                        Util.Hex
+
+executable note-signer
+  main-is:              NoteSigner/Main.hs
+
+  ghc-options:          -W -main-is NoteSigner.Main
+
+  default-extensions:   OverloadedStrings RecordWildCards FlexibleContexts MultiParamTypeClasses
+                        MultiParamTypeClasses TypeSynonymInstances FlexibleInstances DeriveAnyClass
+                        DeriveGeneric
+
+  build-depends:        base >= 4.7 && < 5
+                    ,   bitcoin-payment-channel
+                    ,   promissory-note-types
+                    ,   haskoin-core
+                    ,   haskoin-wallet
+                    ,   haskoin-node
+                    ,   zeromq4-haskell
+                    ,   stm
+                    ,   stm-containers
+                    ,   hashable
+                    ,   servant
+                    ,   servant-server
+                    ,   servant-client
+                    ,   time
+                    ,   cereal
+                    ,   wai
+                    ,   warp
+                    ,   text
+                    ,   bytestring
+                    ,   mtl
+                    ,   configurator
+                    ,   cryptohash-sha256
+                    ,   aeson
+                    ,   text
+--                    ,   key-value-store
+                    ,   mtl
+                    ,   string-conversions
+                    ,   errors
+                    ,   transformers
+                    ,   base16-bytestring
+                    ,   lifted-base
+                    ,   monad-logger
+                    ,   unordered-containers
+                    ,   persistent-sqlite
+                    ,   resourcet
+
+  hs-source-dirs:       src
+
+  default-language:     Haskell2010
+
+  other-modules:        Util.Bitcoin.ChainCache
+                        Util.Bitcoin.Wallet
 
 executable bitcoin-signer
   main-is:              BitcoinSigner/Main.hs
-  ghc-options:          -Wall -main-is BitcoinSigner.Main
+  ghc-options:          -W -main-is BitcoinSigner.Main
   default-extensions:   OverloadedStrings RecordWildCards FlexibleContexts MultiParamTypeClasses
+                        MultiParamTypeClasses TypeSynonymInstances FlexibleInstances DeriveAnyClass
+                        DeriveGeneric
   build-depends:        base >= 4.7 && < 5
                     ,   haskoin-core
                     ,   haskoin-node
@@ -128,7 +179,7 @@ executable bitcoin-signer
                     ,   cryptohash-sha256
                     ,   text
                     ,   hashable
-                    ,   key-value-store
+--                    ,   key-value-store
                     ,   string-conversions
                     ,   servant
                     ,   servant-server
@@ -144,58 +195,25 @@ executable bitcoin-signer
                     ,   cereal
                     ,   base16-bytestring
                     ,   bitcoin-payment-channel
+                    ,   promissory-note-types
                     ,   rate-limit, time-units
                     ,   lifted-base, monad-control, transformers
                     ,   haskeline
                     ,   stm
 
+
   hs-source-dirs:       src
   default-language:     Haskell2010
-  other-modules:
-                        BitcoinSigner.API.Boot
-                        BitcoinSigner.API.Crypto
-                        BitcoinSigner.Lib.App.Boot
-                        BitcoinSigner.Lib.App.Crypto
-                        BitcoinSigner.Lib.Arming.KeyHolder
-                        BitcoinSigner.Lib.Arming.Server
-                        BitcoinSigner.Lib.Arming.Test
-                        BitcoinSigner.Lib.Arming.Types
-                        BitcoinSigner.Lib.Config
-                        BitcoinSigner.Lib.Handler.Arming
-                        BitcoinSigner.Lib.Handler.ArmingDone
-                        BitcoinSigner.Lib.Handler.Class
-                        BitcoinSigner.Lib.Handler.Pubkey
-                        BitcoinSigner.Lib.Handler.Redeem
-                        BitcoinSigner.Lib.Handler.Settle
-                        BitcoinSigner.Lib.Orphans
-                        BitcoinSigner.Lib.Settle
-                        ClearingServer.Lib.Types.Data
-                        PromissoryNote
-                        PromissoryNote.Note
-                        PromissoryNote.Redeem
-                        PromissoryNote.Serialization
-                        Types.Bitcoin.Fee
-                        Types.Orphans
-                        Util.Bitcoin.Fee
+  other-modules:        Util.Bitcoin.ChainCache
                         Util.Bitcoin.Wallet
-                        Util.Bitcoin.Wallet.Cmd
-                        Util.Bitcoin.Wallet.Config
-                        Util.Bitcoin.Wallet.Init
-                        Util.Bitcoin.Wallet.Interface
-                        Util.Bitcoin.Wallet.Keys
-                        Util.Bitcoin.Wallet.NodeList
-                        Util.Bitcoin.Wallet.Server
-                        Util.Common
-                        Util.Config
-                        Util.Crypto
-                        Util.Log
-                        Util.Servant.Run
 
 
 executable bitcoin-signer-arm
-  main-is:              BitcoinSigner/Client/Main.hs
-  ghc-options:          -Wall -main-is BitcoinSigner.Client.Main
+  main-is:              BitcoinSigner/Lib/Arming/Client/Main.hs
+  ghc-options:          -Wall -main-is BitcoinSigner.Lib.Arming.Client.Main
   default-extensions:   OverloadedStrings RecordWildCards FlexibleContexts MultiParamTypeClasses
+                        MultiParamTypeClasses TypeSynonymInstances FlexibleInstances DeriveAnyClass
+                        DeriveGeneric
   build-depends:        base >= 4.7 && < 5
                     ,   haskoin-core
                     ,   haskoin-node
@@ -203,8 +221,8 @@ executable bitcoin-signer-arm
                     ,   zeromq4-haskell
                     ,   stm-containers
                     ,   persistent
-                    ,   data-default
-                    ,   aeson-pretty
+--                    ,   data-default
+--                    ,   aeson-pretty
                     ,   monad-logger
                     ,   unordered-containers
                     ,   persistent-sqlite
@@ -216,7 +234,7 @@ executable bitcoin-signer-arm
                     ,   cryptohash-sha256
                     ,   text
                     ,   hashable
-                    ,   key-value-store
+--                    ,   key-value-store
                     ,   string-conversions
                     ,   servant
                     ,   servant-server
@@ -232,6 +250,7 @@ executable bitcoin-signer-arm
                     ,   cereal
                     ,   base16-bytestring
                     ,   bitcoin-payment-channel
+                    ,   promissory-note-types
                     ,   rate-limit, time-units
                     ,   lifted-base, monad-control, transformers
                     ,   haskeline
@@ -239,4 +258,5 @@ executable bitcoin-signer-arm
 
   hs-source-dirs:       src
   default-language:     Haskell2010
-  other-modules:
+  other-modules:        Util.Bitcoin.ChainCache
+                        Util.Bitcoin.Wallet

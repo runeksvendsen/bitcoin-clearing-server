@@ -4,67 +4,82 @@ module Util.Bitcoin.Wallet.Cmd where
 import              Types
 import              Util
 import              Network.Haskoin.Wallet
--- import              Network.Haskoin.Wallet.Model
+import qualified Network.Haskoin.Wallet.Internals as HI
+import qualified Control.Monad.Reader as Reader
 import qualified    Network.Haskoin.Crypto      as HC
+import qualified    Network.Haskoin.Block       as HB
 import qualified    Network.Haskoin.Node.STM    as Node
 import qualified    System.ZMQ4                 as ZMQ
 import qualified    Data.Aeson                  as JSON
-import              Data.Word
 
 
-init :: Config -> ZMQ.Context -> HC.XPubKey -> IO JsonAccount
-init cfg ctx pubkey = do
-    accountList <- cmdListAccounts cfg ctx
-    if null accountList then
-             createInitialWalletAccount
-        else checkAccountMatch accountList
-    return $ head accountList
-    where
-        createInitialWalletAccount = void $ cmdNewAccount cfg ctx (mkNewAccount pubkey)
-        checkAccountMatch :: [JsonAccount] -> IO ()
-        checkAccountMatch acl = when (length acl /= 1) $
-            error "INIT: There should be only one account in the wallet."
 
 
-cmdNewAccount :: Config -> ZMQ.Context -> NewAccount -> IO JsonAccount
-cmdNewAccount cfg ctx na =
-    sendCmdOrFail cfg ctx (PostAccountsR na) >>=
-    maybe (error "ERROR: New account-command: no response.") return
+cmdBlockInfo :: HB.BlockHash -> WalletM (Maybe HI.BlockInfo)
+cmdBlockInfo bh = listToMaybe <$>
+    ( cmdSend (GetBlockInfoR [bh]) >>= getResOrFail "cmdBlockInfo" )
 
-cmdListAccounts :: Config -> ZMQ.Context -> IO [JsonAccount]
-cmdListAccounts cfg ctx =
-    sendCmdOrFail cfg ctx (GetAccountsR listRequestAll) >>=
-    maybe (error "ERROR: List command: no response.") (return . listResultItems)
+cmdNewAccount :: NewAccount -> WalletM JsonAccount
+cmdNewAccount na =
+    cmdSend (PostAccountsR na) >>= getResOrFail "cmdNewAccount"
 
-cmdListAddresses :: Config -> ZMQ.Context -> Text -> Word32 -> IO [JsonAddr]
-cmdListAddresses cfg ctx accountName minConf =
-    sendCmdOrFail cfg ctx
+cmdListAccounts :: WalletM [JsonAccount]
+cmdListAccounts =
+    cmdSend (GetAccountsR listRequestAll) >>= getResOrFail "cmdListAccounts"
+
+cmdListAddresses :: Text -> Word32 -> WalletM [JsonAddr]
+cmdListAddresses accountName minConf =
+    cmdSend
         (GetAddressesR accountName AddressExternal minConf True listRequestAll) >>=
-    maybe (error "ERROR: List command: no response.") (return . listResultItems)
+    getResOrFail "cmdListAddresses"
 
-cmdListKeys :: Config -> ZMQ.Context -> Text -> IO [JsonAddr]
-cmdListKeys cfg ctx name = cmdListAddresses cfg ctx name 0
+cmdListKeys :: Text -> WalletM [JsonAddr]
+cmdListKeys name = cmdListAddresses name 0
 
-cmdGetStatus :: Config -> ZMQ.Context -> IO Node.NodeStatus
-cmdGetStatus cfg ctx =
-    sendCmdOrFail cfg ctx (PostNodeR NodeActionStatus) >>=
-    maybe (error "ERROR: Status command: no response.") return
+cmdGetStatus :: WalletM Node.NodeStatus
+cmdGetStatus =
+    cmdSend (PostNodeR NodeActionStatus) >>= getResOrFail "cmdGetStatus"
+
+cmdImportTx :: Text -> BitcoinTx -> WalletM JsonTx
+cmdImportTx name tx =
+    cmdSend cmd >>= getResOrFail "cmdImportTx"
+        where cmd = PostTxsR name Nothing (ImportTx tx)
+
+
+
+getResOrFail :: Monad m => String -> Maybe a -> m a
+getResOrFail name = maybe (error $ "ERROR: " ++ name ++ ": no response.") return
+
+
+type WalletM = Reader.ReaderT (Config, ZMQ.Context) IO
+
+runCmd :: (Config, ZMQ.Context) -> WalletM a -> IO a
+runCmd = flip Reader.runReaderT
+
+cmdSend :: (JSON.FromJSON a, JSON.ToJSON a)
+        => WalletRequest
+        -> WalletM (Maybe a)
+cmdSend req = do
+    cfg <- asks fst
+    ctx <- asks snd
+    liftIO $ sendCmdOrFail cfg ctx req
+
 
 sendCmdOrFail :: (JSON.FromJSON a, JSON.ToJSON a)
               => Config -> ZMQ.Context -> WalletRequest -> IO (Maybe a)
 sendCmdOrFail cfg ctx cmd =
-    sendCmd cfg ctx cmd >>=
+    _sendCmd cfg ctx cmd >>=
     either error return >>=
     \res -> case res of
         ResponseError e -> error $ "ERROR: Send cmd, ResponseError: " ++ cs e
         ResponseValid r -> return r
 
-sendCmd :: (JSON.FromJSON a, JSON.ToJSON a)
+_sendCmd :: (JSON.FromJSON a, JSON.ToJSON a)
         => Config
         -> ZMQ.Context
         -> WalletRequest
         -> IO (Either String (WalletResponse a))
-sendCmd Config{..} ctx cmd =
+_sendCmd Config{..} ctx cmd =
     ZMQ.withSocket ctx ZMQ.Req $ \sock -> do
         ZMQ.setLinger (ZMQ.restrict (0 :: Int)) sock
         ZMQ.connect sock configBind

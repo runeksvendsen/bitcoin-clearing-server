@@ -1,9 +1,14 @@
 module Util.Bitcoin.Wallet
 (
-    spawnWallet
-,   defaultConfig
+    module Types
+,   module Config
+,   spawnWallet
+,   Interface(..)
 )
 where
 
+import Util.Bitcoin.Wallet.Types     as Types
 import Util.Bitcoin.Wallet.Server      (spawnWallet)
-import Util.Bitcoin.Wallet.Config      (defaultConfig)
+import Util.Bitcoin.Wallet.Config    as Config
+import Util.Bitcoin.Wallet.Interface   (Interface(..))
+

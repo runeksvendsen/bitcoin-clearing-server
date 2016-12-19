@@ -6,6 +6,7 @@ module Types
   , Pay.BitcoinAmount
   , Pay.SendPubKey(..)
   , Pay.RecvPubKey(..)
+  , Pay.FullPayment(..)
 
   , BS.ByteString
   , T.Text

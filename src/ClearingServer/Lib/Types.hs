@@ -1,4 +1,4 @@
-{-# LANGUAGE  DeriveGeneric #-}
+{-# LANGUAGE DeriveGeneric, DeriveAnyClass #-}
 module ClearingServer.Lib.Types
 (
     module Types
@@ -7,15 +7,18 @@ module ClearingServer.Lib.Types
   , PaymentMethod(..)
   , PaymentInstruction(..)
   , PaymentServerInfo(..)
+  , ClearSrvError(..)
 )
 where
 
 import           Types
 import           Util.Crypto
 import           ClearingServer.Lib.Types.Data
+import           ClearingServer.Lib.Types.Error
 import           GHC.Generics
 import qualified Servant.Common.BaseUrl as BaseUrl
 import           Data.Aeson (FromJSON, ToJSON)
+import qualified Data.Serialize as Bin
 
 
 data NoteOrder = NoteOrder
@@ -24,7 +27,7 @@ data NoteOrder = NoteOrder
   , quantity        :: Word
   , payee_pk        :: UUID
   , payment_method  :: PaymentMethod
-  } deriving Generic
+  } deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
 
 data NoteInvoice = NoteInvoice
   { invoice_date    :: UTCTime
@@ -32,43 +35,24 @@ data NoteInvoice = NoteInvoice
   , order_ref       :: NoteOrder
   , order_total     :: Amount
   , issuer_sig      :: Signature
-  } deriving Generic
+  } deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
 
 data PaymentMethod =
-    PayByPaymentChan    PayChanProtocol ChannelID
-        deriving Generic
+    PayByPaymentChan PayChanProtocol ChannelID
+        deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
 
 data PaymentInstruction =
     PayToServer PaymentServerInfo
-        deriving Generic
+        deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
 
 
 data PaymentServerInfo = PaymentServerInfo
   { -- | URL of the payment channel server that payments are made to
-    paychan_endpoint    ::  URL
+    paychan_endpoint    ::  URL -- TODO: replace with BaseUrl
     -- | Protocol spoken by the payment channel server at the 'paychan_endpoint' URL
   , paychan_protocol    ::  PayChanProtocol
-  } deriving Generic
+  } deriving (Generic, ToJSON, FromJSON, Bin.Serialize)
 
 type URL = String
 data PayChanProtocol = RBPCP | BitcoinJ
-    deriving Generic
-
--- Boilerplate
-instance ToJSON NoteOrder
-instance FromJSON NoteOrder
-
-instance ToJSON NoteInvoice
-instance FromJSON NoteInvoice
-
-instance ToJSON PaymentMethod
-instance FromJSON PaymentMethod
-
-instance ToJSON PaymentInstruction
-instance FromJSON PaymentInstruction
-
-instance ToJSON PaymentServerInfo
-instance FromJSON PaymentServerInfo
-
-instance ToJSON PayChanProtocol
-instance FromJSON PayChanProtocol
+    deriving (Generic, ToJSON, FromJSON, Bin.Serialize)

@@ -5,14 +5,15 @@ module Util
   , module Util.Hex
   , module Types
   , retry
-  , Reader.ask, Reader.asks
+  , Reader.ask, Reader.asks, Reader.runReaderT
   , readerToEither
-  , envReadPort
+  , envRead
   , errorWithDescription
   , runLocalhost
   , log_info, log_info'
   , log_warn, log_warn'
   , log_error, log_error'
+  , unlines
 )
 where
 
@@ -35,8 +36,8 @@ import           Text.Read (readMaybe)
 readerToEither :: conf -> AppM conf :~> Handler
 readerToEither cfg = Nat $ \x -> Reader.runReaderT x cfg
 
-envReadPort :: IO (Maybe Word)
-envReadPort = maybe Nothing readMaybe <$> lookupEnv "PORT"
+envRead :: Read a => String -> IO (Maybe a)
+envRead envVar = maybe Nothing readMaybe <$> lookupEnv envVar
 
 errorWithDescription :: Int -> String -> AppM conf a
 errorWithDescription code e = Except.throwError $
@@ -46,3 +47,5 @@ runLocalhost :: Word -> Wai.Application -> IO ()
 runLocalhost port = Warp.runSettings settings
     where settings = Warp.setPort (fromIntegral port) $
                         Warp.setHost "127.0.0.1" Warp.defaultSettings
+
+

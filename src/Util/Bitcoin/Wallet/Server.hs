@@ -4,7 +4,7 @@ module Util.Bitcoin.Wallet.Server
 )
 where
 
-import           Util.Bitcoin.Wallet.Interface   (Interface, mkInterface)
+import           Util.Bitcoin.Wallet.Interface   (Interface, initInterface)
 import           Network.Haskoin.Wallet           (Config(..))
 import           Network.Haskoin.Wallet.Server    (runSPVServerWithContext)
 import           Network.Haskoin.Wallet.Internals (Notif(..))
@@ -32,7 +32,7 @@ spawnWallet conf ctx pk notifHandler = do
     -- Notify thread
     putStrLn "Starting notification thread..."
     _ <- Con.forkIO $ retryTimesWithDelay "NotifyThread" 100 100000 $ notifyThread conf ctx notifHandler  -- Give the wallet 10 seconds to boot up
-    mkInterface conf ctx pk
+    initInterface conf ctx pk
 
 -- |Run haskoin-wallet using the specified ZeroMQ Context,
 --  and log to stderr.

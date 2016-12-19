@@ -1,7 +1,12 @@
-{-# LANGUAGE  DeriveGeneric #-}
-module BitcoinSigner.Lib.Arming.Types where
+{-# LANGUAGE  DeriveGeneric, FlexibleInstances #-}
+module BitcoinSigner.Lib.Arming.Types
+(
+  module BitcoinSigner.Lib.Arming.Types
+-- , module BitcoinSigner.Lib.Arming.Crypto.Class
+)
+where
 
-import           Types
+-- import           BitcoinSigner.Lib.Arming.Crypto.Class
 import qualified Control.Concurrent.MVar        as MV
 import qualified Network.Haskoin.Crypto         as HC
 import qualified Data.ByteString.Lazy           as BL
@@ -10,28 +15,51 @@ import qualified Data.Serialize as Bin
 import qualified Servant.API.ContentTypes as Content
 
 
-data ArmingPacket = ArmingPacket
-    { key   :: HC.XPrvKey
-    }  deriving Generic
+class Bin.Serialize k => IsPrivateKey k where
+    getHash :: k -> HC.Hash256
+    getHash = HC.hash256 . Bin.encode
 
-data ArmingResponse = ArmingResponse
-    { pk    :: HC.PubKeyC
-    }  deriving Generic
+    mkArmingPacket :: k -> ArmingPacket k
+    mkArmingPacket = ArmingPacket
 
-type KeyHolder = MV.MVar (Either HC.XPrvKey HC.XPrvKey)
+    mkArmingResponse :: k -> ArmingResponse k
+    mkArmingResponse = ArmingResponse . getHash
+
+    validArmingResponse :: IsPrivateKey k => k -> ArmingResponse k -> Bool
+    validArmingResponse key (ArmingResponse prvKeyHash) =
+        getHash key == prvKeyHash
 
 
-instance Bin.Serialize ArmingPacket
-instance Bin.Serialize ArmingResponse
+data ArmingPacket k = ArmingPacket
+    { key   :: k
+    }  deriving (Generic, Show)
+
+data ArmingResponse k = ArmingResponse
+    { keyHash :: HC.Hash256
+    }  deriving (Generic, Show)
 
 
+instance IsPrivateKey k => Bin.Serialize (ArmingPacket k)
+instance IsPrivateKey k => Bin.Serialize (ArmingResponse k)
 
-instance Content.MimeUnrender Content.OctetStream ArmingResponse where
+instance IsPrivateKey k => Content.MimeUnrender Content.OctetStream (ArmingResponse k) where
     mimeUnrender _ = Bin.decode . BL.toStrict
-instance Content.MimeRender Content.OctetStream ArmingResponse where
+instance IsPrivateKey k => Content.MimeRender Content.OctetStream (ArmingResponse k) where
     mimeRender _ = BL.fromStrict . Bin.encode
 
-instance Content.MimeUnrender Content.OctetStream ArmingPacket where
+instance IsPrivateKey k => Content.MimeUnrender Content.OctetStream (ArmingPacket k) where
     mimeUnrender _ = Bin.decode . BL.toStrict
-instance Content.MimeRender Content.OctetStream ArmingPacket where
+instance IsPrivateKey k => Content.MimeRender Content.OctetStream (ArmingPacket k) where
     mimeRender _ = BL.fromStrict . Bin.encode
+
+
+
+type KeyHolder k = MV.MVar (Either () k)
+
+instance IsPrivateKey HC.XPrvKey
+type BTCKeyHolder      = KeyHolder HC.XPrvKey
+type BTCArmingPacket   = ArmingPacket HC.XPrvKey
+type BTCArmingResponse = ArmingResponse HC.XPrvKey
+
+
+

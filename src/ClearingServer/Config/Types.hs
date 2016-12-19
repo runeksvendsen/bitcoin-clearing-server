@@ -3,23 +3,19 @@
 module ClearingServer.Config.Types
 (
     module ClearingServer.Config.Types
---   , module Types.Config
 )
 where
 
--- import           Types
--- import           Types.Config
-import           Util.Config
+import           Types.Config               (FromConfig(..))
+import qualified NoteSigner.Interface     as Sign
 import           Util.Config.Parse
-import qualified Data.Tagged as Tag
-import qualified Servant.Common.BaseUrl as BaseUrl
+import qualified Data.Tagged              as Tag
+import qualified Servant.Common.BaseUrl   as BaseUrl
+
+import           Util           (fromMaybe, envRead)
 import           Servant.Server.Internal.Context
-import qualified Data.Configurator.Types as Configurator
 
-class FromConfig a where
-    fromConf :: Configurator.Config -> IO a
 
----
 data ChanManager
 type ChanManagerConn = Tag.Tagged ChanManager BaseUrl.BaseUrl
 instance FromConfig ChanManagerConn where
@@ -32,10 +28,28 @@ instance FromConfig PayChanConn where
 
 type CallbackPort = Tag.Tagged "CBPort" Word
 instance FromConfig CallbackPort where
-    fromConf cfg = Tag.Tagged <$> configLookupOrFail cfg "valueCallback.port"
+    fromConf _ = Tag.Tagged .
+        fromMaybe (error "Missing CALLBACK_PORT env var.") <$>
+        (envRead "CALLBACK_PORT")
 
 getCallbackPort :: AppConf -> Word
 getCallbackPort = Tag.untag . callbackPort
+
+
+
+data AppConf = AppConf
+  { manageEndpoint      :: ChanManagerConn
+  , paymentEndpoint     :: PayChanConn
+  , callbackPort        :: CallbackPort
+  , signerIface         :: Sign.Interface
+  }
+
+instance FromConfig AppConf where
+    fromConf cfg = AppConf <$>
+        fromConf cfg <*>
+        fromConf cfg <*>
+        fromConf cfg <*>
+        fromConf cfg
 
 
 -- New style
@@ -48,15 +62,3 @@ instance FromConfig AppConf' where
         c <- fromConf cfg
         return $ a :. b :. c :. EmptyContext
 
--- Old style
-data AppConf = AppConf
-  { manageEndpoint      :: ChanManagerConn
-  , paymentEndpoint     :: PayChanConn
-  , callbackPort        :: CallbackPort
-  }
-
-instance FromConfig AppConf where
-    fromConf cfg = AppConf <$>
-        fromConf cfg <*>
-        fromConf cfg <*>
-        fromConf cfg

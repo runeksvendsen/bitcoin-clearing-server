@@ -6,7 +6,7 @@ import           Util
 import qualified ClearingServer.API as API
 import qualified ClearingServer.Config.Types as Conf
 
-import           ClearingServer.Handlers.Order  (noteOrderHandler)
+import           ClearingServer.Handlers.Solvency  (solvencyHandler)
 import           ClearingServer.Handlers.Redeem (noteRedemptionHandler)
 
 import           Servant
@@ -14,7 +14,7 @@ import qualified Network.Wai as Wai
 
 
 app :: ServerT API.Issue (AppM Conf.AppConf)
-app = noteOrderHandler :<|> noteRedemptionHandler
+app = noteRedemptionHandler :<|> solvencyHandler
 
 api :: Proxy API.Issue
 api = Proxy

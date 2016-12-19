@@ -1,12 +1,27 @@
-module Util.Bitcoin.Wallet.Config where
+{-# LANGUAGE OverloadedStrings #-}
+module Util.Bitcoin.Wallet.Config
+(
+  mkConfig
+, defaultConfig
+, BitcoinNet(..)
+, Config(..)
+)
+where
 
-import           Util.Bitcoin.Wallet.NodeList    (btcNodes)
+import           Util.Bitcoin.Wallet.NodeList     (btcNodes, BTCNode)
 import           Network.Haskoin.Wallet           (Config(..), AddressType(..),
                                                    OutputFormat(..), SPVMode(..))
 import qualified Control.Monad.Logger           as Log
 import qualified Data.HashMap.Strict            as HM
 import qualified Database.Persist.Sqlite        as DB
+import qualified Data.Text as T
 
+
+data BitcoinNet = Prodnet | Testnet deriving Eq
+
+toStr :: BitcoinNet -> T.Text
+toStr Prodnet = "prodnet"
+toStr Testnet = "testnet"
 
 databaseConf :: DB.SqliteConf   --TODO: config
 databaseConf = DB.SqliteConf "/Users/rune/IdeaProjects/bitcoin-clearing-server/db2" 1
@@ -16,6 +31,21 @@ cmdSocket = "inproc://cmd"
 
 notifSocket :: String
 notifSocket = "inproc://notif"
+
+-- TODO: Custom nodes
+mkConfig ::
+       BitcoinNet
+    -> DB.SqliteConf
+--     -> [BTCNode]
+    -> Config
+mkConfig btcNet dbConf =
+    defaultConfig
+        { configTestnet  = btcNet == Testnet
+        , configDatabase = HM.fromList [ ( toStr btcNet, dbConf ) ]
+--         , configBTCNodes = HM.fromList [ ( toStr btcNet, nodes ) ]
+        }
+
+
 
 defaultConfig :: Config
 defaultConfig = Config
@@ -29,7 +59,7 @@ defaultConfig = Config
     -- ^ Fee to pay per 1000 bytes when creating new transactions
     , configRcptFee       = False
     -- ^ Recipient pays fee (dangerous, no config file setting)
-    , configAddrType      = AddressExternal     -- AddressExternal
+    , configAddrType      = AddressExternal
     -- ^ Return internal instead of external addresses
     , configOffline       = False
     -- ^ Display the balance including offline transactions
@@ -57,7 +87,7 @@ defaultConfig = Config
     -- ^ Bind address for ZeroMQ notifications
     , configBTCNodes      = HM.fromList [ ( "prodnet", btcNodes ) ]
     -- ^ Trusted Bitcoin full nodes to connect to
-    , configMode          = SPVOffline   --TODO: tmp
+    , configMode          = SPVOnline
     -- ^ Operation mode of the SPV node.
     , configBloomFP       = 0.00001
     -- ^ False positive rate for the bloom filter.

@@ -3,27 +3,28 @@ module BitcoinSigner.Lib.Arming.KeyHolder where
 import           Util
 import           BitcoinSigner.Lib.Arming.Types
 import qualified Control.Concurrent.MVar        as MV
-import qualified Network.Haskoin.Crypto         as HC
-import qualified Control.Concurrent             as Con
 
 
-createEmptyKeyHolder :: IO KeyHolder
+createEmptyKeyHolder :: IsPrivateKey k => IO (KeyHolder k)
 createEmptyKeyHolder  = MV.newEmptyMVar
 
-waitForKey :: KeyHolder -> IO HC.XPrvKey
-waitForKey h = MV.readMVar h >>=
-    -- If Left, wait a second a try again
-    -- When the "arming_done" request has been processed,
-    --  the MVar will contain a Right, and this will return
-    either (\_ -> logRecv >> Con.threadDelay (round 1e6) >> waitForKey h) return
-    where logRecv = log_info "Waiting for finish request..."
+-- |The server main thread will wait for the key.
+waitForKey :: IsPrivateKey k => KeyHolder k -> IO k
+waitForKey h = MV.takeMVar h >>=
+    -- When we read a "Right key", the sender has given us the key.
+    either (const $ logWarn >> waitForKey h) (\k -> logRecv >> waitWithKey k)
+  where
+    -- When we read something next, the sender has come back to signal we're done.
+    waitWithKey prvKey = MV.takeMVar h >>= const (return prvKey)
+    logRecv = log_info "Received private key. Waiting for finish request..."
+    logWarn = log_warn "Received 'Left ()' before receiving private key"
 
-putKeyInHolder :: HC.XPrvKey -> KeyHolder -> IO ()
-putKeyInHolder = flip MV.putMVar . Left
+-- |While the arming server handler will put the received key in the holder.
+putKeyInHolder :: IsPrivateKey k => k -> KeyHolder k -> IO ()
+putKeyInHolder = flip MV.putMVar . Right
 
--- |Signal, by changing from Left to Right, that we can safely kill the server
-finishArm :: KeyHolder -> IO ()
-finishArm h = Con.modifyMVar_ h switchToRight
-    where switchToRight (Left privKey) = return $ Right privKey
-          switchToRight (Right _) = error "Private key is already in Right for 'finishArm'"
+-- |Signal to the main thread that we can safely kill the arming server
+finishArm :: IsPrivateKey k => KeyHolder k -> IO ()
+finishArm h = MV.putMVar h $ Left ()
+
 

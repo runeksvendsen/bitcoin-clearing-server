@@ -9,5 +9,8 @@ import           Data.EitherR (fmapL)
 runReq :: ExceptT.ExceptT SC.ServantError IO a -> IO (Either String a)
 runReq = fmap (fmapL show) . ExceptT.runExceptT
 
+runReq' :: ExceptT.ExceptT SC.ServantError IO a -> IO (Either SC.ServantError a)
+runReq' = ExceptT.runExceptT
+
 runHandler :: ExceptT.ExceptT SS.ServantErr IO a -> IO (Either String a)
 runHandler = fmap (fmapL show) . ExceptT.runExceptT

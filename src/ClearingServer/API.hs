@@ -15,8 +15,8 @@ import qualified RBPCP.Callback as CB
 
 -- |The API exposed by this server
 type Issue =
-          "issue"  :> "order"     :> ReqBody '[JSON]  NoteOrder       :> Post '[JSON] NoteInvoice
-    :<|>  "redeem"                :> ReqBody '[JSON] [PromissoryNote] :> Post '[JSON] HT.Tx
-    -- Internal
+          "redeem"      :> ReqBody '[JSON] [RedeemBlock]    :> Post '[JSON] HT.Tx
+    :<|>  "solvency"                                        :> Get '[JSON]  Int
+
 
 type Callback = CB.PaymentCallback

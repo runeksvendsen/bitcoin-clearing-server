@@ -4,7 +4,7 @@ module Util.Common
 ,   (<>)
 ,   void, when, unless
 ,   fmapL
-,   fromMaybe
+,   fromMaybe, listToMaybe
 ,   MonadIO, liftIO
 ,   tshow
 )
@@ -15,7 +15,7 @@ import           Data.String.Conversions (cs)
 import           Data.Monoid ((<>))
 import           Control.Monad (void, when, unless)
 import           Data.EitherR (fmapL)
-import           Data.Maybe (fromMaybe)
+import           Data.Maybe (listToMaybe, maybeToList, fromMaybe)
 import           Control.Monad.IO.Class (MonadIO, liftIO)
 import           Data.Text
 

@@ -47,7 +47,7 @@ claimChanFundsM :: Pay.ReceiverPaymentChannelX   -- ^ Receiver state object
                 -> Pay.BitcoinAmount             -- ^ Bitcoin transaction fee
                 -> KeyBox HT.Tx                  -- ^ Bitcoin transaction
 claimChanFundsM rpc fee = Pay.getSettlementBitcoinTx rpc <$>
-    signFunc <*> pure destAddr <*> pure fee
+    pure destAddr <*> signFunc <*> pure fee
   where signFunc = flip HC.signMsg <$> getPrvKey (Pay.rpcGetXPub rpc)
         destAddr = HC.xPubAddr (Pay.rpcGetXPub rpc)
 
